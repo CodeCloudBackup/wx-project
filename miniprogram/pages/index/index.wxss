@@ -1,0 +1,302 @@
+/**index.wxss**/
+/**index.wxss**/
+/* pages/index/index.wxss */
+page {
+  width: 100%;
+  height: 100vh;
+  background-color: #1a1a2e;
+  color: #fff;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 2vmin;
+  box-sizing: border-box;
+}
+
+/* ==================== 顶部状态栏 ==================== */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2vmin 3vmin;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 2vmin;
+  margin-bottom: 2vmin;
+}
+
+.status-text {
+  font-size: 3vmin;
+  color: #ccc;
+}
+
+/* 电量显示区域 */
+.battery-display {
+  display: flex;
+  align-items: center;
+  gap: 1vmin;
+  margin-left: 2vmin;
+}
+
+/* 灰色电池图标（纯 CSS 绘制） */
+.battery-icon {
+  display: flex;
+  align-items: center;
+  gap: 1vmin;
+}
+.battery-body {
+  width: 6vmin;
+  height: 3.5vmin;
+  border: 2px solid #888;       /* 灰色边框 */
+  border-radius: 1vmin;
+  position: relative;
+}
+
+.battery-head {
+  width: 1.5vmin;
+  height: 1.5vmin;
+  background-color: #888;       /* 灰色正极 */
+  border-radius: 0 0.5vmin 0.5vmin 0;
+}
+
+.battery-text {
+  font-size: 2.8vmin;
+  font-weight: bold;
+}
+
+/* 根据电量动态变色（在 JS 里动态设置 class） */
+.battery-high {
+  color: #4caf50;           /* 电量 > 50%：绿色 */
+}
+
+.battery-medium {
+  color: #ff9800;           /* 电量 20%~50%：橙色 */
+}
+
+.battery-low {
+  color: #f44336;           /* 电量 < 20%：红色 */
+}
+
+.connect-btn {
+  background-color: #07c160;
+  color: #fff;
+  font-size: 2.5vmin;
+  padding: 1.5vmin 4vmin;
+  border-radius: 1.5vmin;
+  border: none;
+}
+
+.disconnect-btn {
+  background-color: #f44336;
+  color: #fff;
+  font-size: 2.5vmin;
+  padding: 1.5vmin 4vmin;
+  border-radius: 1.5vmin;
+  border: none;
+}
+
+/* ==================== 主体内容 ==================== */
+.main-content {
+  display: flex;
+  flex: 1;
+  gap: 30vmin; /* 摇杆和右侧按钮区的间距，调大从2vmin到4vmin */
+  padding: 0 10vmin; /* 左右两侧与屏幕边缘的间距，各3vmin */
+}
+
+/* ==================== 左侧摇杆区域 ==================== */
+.joystick-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  padding-left: 10vmin;  /* 摇杆与屏幕左边的间距 */
+  padding-bottom: 27vmin;  /* 新增：摇杆与屏幕左边的间距 */
+}
+
+/* 独立功能按钮区 */
+.system-btns {
+  display: flex;
+  justify-content: center;
+  gap: 5vmin;              /* 按钮相互的间距 */
+  margin-bottom: 10vmin;  /* 与摇杆的间距 */
+  width: 100%;             /* 确保占满父容器 */
+}
+
+.system-btn {
+  flex: 1;
+  max-width: 20vmin;
+  height: 7vmin;
+  font-size: 2.2vmin;
+  border-radius: 2vmin;
+  border: 2px solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.2;
+}
+
+/* 四足复位 - 橙色 */
+.system-btn-reset {
+  background-color: #ff9800;
+  color: #fff;
+  border-color: #ff9800;
+}
+
+/* 机器狗重启 - 红色 */
+.system-btn-reboot {
+  background-color: #f44336;
+  color: #fff;
+  border-color: #f44336;
+}
+.joystick-container {
+  position: relative;
+  width: 200px;  /* 根据你的实际尺寸调整 */
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+}
+/* 摇杆底座 */
+.joystick-base {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160px;
+  height: 160px;
+  margin-top: -80px;
+  margin-left: -80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+/* 摇杆手柄 */
+.joystick-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  margin-top: -30px;
+  margin-left: -30px;
+  border-radius: 50%;
+  background: #4CAF50;  /* 绿色圆 */
+}
+
+.joystick-handle.active {
+  transition: none;
+}
+
+/* 油门数值 */
+.joystick-value {
+  color: #ccc;
+  margin-top: 3vmin;
+  font-size: 3vmin;
+}
+
+/* ==================== 右侧动作网格 ==================== */
+.action-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60%;
+  padding-right: 0vmin;  /* 12键按钮与屏幕右边的间距 */
+  padding-bottom: 30vmin;  /* 12按键与屏幕底部的间距 */
+}
+/* 包裹滑动控制和按钮网格 */
+.action-wrapper {
+  display: flex;
+  flex-direction: column;    /* 垂直排列 */
+  align-items: center;   /* 中间对齐 */
+  width: 100%;
+  max-width: 100vmin;
+  gap: 8vmin; /* 滑动控制和按钮之间的间距 */
+}
+
+/* ==================== 狗头转向滑动控制 ==================== */
+.slider-container {
+  width: 100%;
+  max-width: 100vmin;         /* max-width 对齐 */
+  display: flex;
+  flex-direction: row;          /* 横向布局 */
+  align-items: center;          /* 垂直居中 */
+  justify-content: space-between; /* 两端对齐 */
+  margin-bottom: 2vmin;         /* 20rpx → 2vmin */
+  padding: 1vmin 0;        /* 左右各留 2vmin 边距 */
+  gap: 2vmin;  
+}
+
+.slider-left {
+  flex: 1;                      /* 左侧占满剩余空间 */
+  display: flex;
+  align-items: center;          /* 内部垂直居中 */
+}
+
+.slider-label {
+  font-size: 2.8vmin;           /* 28rpx → 2.8vmin */
+  color: #ccc;                  /* 浅色适配深色背景 */
+  margin-right: 1.6vmin;        /* 16rpx → 1.6vmin */
+  white-space: nowrap;          /* 标签不换行 */
+}
+
+.head-slider {
+  flex: 1;                      /* 滑动条自适应宽度 */
+  margin: 0 0.8vmin;            /* 8rpx → 0.8vmin */
+}
+
+.heading-value {
+  font-size: 2.6vmin;           /* 26rpx → 2.6vmin */
+  color: #aaa;
+  min-width: 6vmin;             /* 60rpx → 6vmin */
+  text-align: right;
+  margin-left: 0.8vmin;         /* 8rpx → 0.8vmin */
+}
+
+.expression-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12vmin;                /* 120rpx → 12vmin */
+  height: 6vmin;                /* 60rpx → 6vmin */
+  border-radius: 3vmin;         /* 30rpx → 3vmin */
+  flex-shrink: 0;               /* 防止在小屏幕上被压缩 */
+  transition: background-color 0.3s ease;
+  box-shadow: 0 0.4vmin 1.2vmin rgba(0, 0, 0, 0.1);  /* 4rpx → 0.4vmin, 12rpx → 1.2vmin */
+}
+.expression-name {
+  font-size: 2.6vmin;           /* 26rpx → 2.6vmin */
+  color: #fff;
+  font-weight: bold;
+}
+/* ==================== 预定动作控制 ==================== */
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);  /* 调整：从 3 列改成 4 列 */
+  gap: 3vmin;
+  width: 100%;
+  max-width: 100vmin;  /* 网格最大宽度 */
+}
+
+.action-btn {
+  height: 10vmin;
+  font-size: 2.8vmin;
+  min-width: 20vmin;        /* 确保按钮最小宽度 */
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2vmin;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.2;
+  padding: 0;       /*去掉默认内边距，让宽度完全由 grid 控制 */
+}
+
+.action-btn:active {
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: scale(0.95);
+}
+
+
+

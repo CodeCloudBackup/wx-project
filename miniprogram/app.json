@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于搜索附近的蓝牙设备"
+    },
+    "scope.bluetooth": {
+      "desc": "用于连接和控制你的机器狗"
+    }
+  },
+  "requiredBackgroundModes": ["bluetooth"]
+}
