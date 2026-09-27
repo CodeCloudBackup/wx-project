@@ -1,6 +1,6 @@
 // index.ts
 // pages/index/index.ts
-import { CmdCode, ActionValue, packFrame, bufferToHex } from '../utils/protocol';
+import { CmdCode, ActionValue, ExpressionType, packFrame, bufferToHex } from '../utils/protocol';
 
 // ========== 心跳参数 ==========
 const HEARTBEAT_PERIOD_MS = 2000; // 心跳周期：2秒
@@ -8,6 +8,16 @@ const HEARTBEAT_MISS_LIMIT = 5;   // 连续5个周期(~10秒)设备无回复判�
 
 // 设备列表本地缓存 key
 const DEVICE_LIST_KEY = 'jdy_device_list';
+// 摇杆指令发送最小间隔（ms），即最高 10 次/秒
+const JOYSTICK_SEND_INTERVAL_MS = 100;
+
+// 定义表情项的类型
+interface ExpressionItem {
+  name: string;
+  icon: string;
+  color: string;
+  value: number;
+}
 
 // 定义 Page Data 的类型
 interface PageData {
@@ -26,9 +36,12 @@ interface PageData {
   deviceList: Array<{ deviceId: string; name: string }>;
   showDevicePopup: boolean;
   // 摇杆状态
-  joystickX: number;
-  joystickY: number;
+  joystickX: number;  // 滑杆X坐标
+  joystickY: number;  // 滑杆Y坐标
+  throttleX: number;  // 油门X值
+  throttleY: number;  // 油门Y值
   isTouching: boolean;
+  lastStickSendAt: number;
   handleLeft: number;
   handleTop: number;
 
@@ -73,7 +86,10 @@ Page({
     // 摇杆
     joystickX: 0,
     joystickY: 0,
+    throttleX: 0,  // 油门X值
+    throttleY: 0,  // 油门Y值
     isTouching: false,
+    lastStickSendAt: 0,
     handleLeft: 50,
     handleTop: 50,
 
@@ -82,10 +98,12 @@ Page({
     // 表情相关数据
     expressionIndex: 0,
     expressionList: [
-      { name: '开心', icon: '😊', color: '#FFD700' },
-      { name: '哭泣', icon: '😭', color: '#4169E1' },
-      { name: '发呆', icon: '😶', color: '#D3D3D3' },
-      { name: '生气', icon: '😡', color: '#FF4500' }
+      { name: '开心', icon: '😊', color: '#FFD700', value: ExpressionType.HAPPY },
+      { name: '哭泣', icon: '😭', color: '#4169E1', value: ExpressionType.CRY},
+      { name: '发呆', icon: '😶', color: '#D3D3D3', value: ExpressionType.DAZE },
+      { name: '生气', icon: '😡', color: '#FF4500', value: ExpressionType.ANGRY },
+      { name: '睡觉', icon: '😴', color: '#43adebff', value: ExpressionType.SLEEP },
+      { name: '正常', icon: '😐', color: '#3b3182ff', value: ExpressionType.NORMAL }
     ] as ExpressionItem[],
     expressionIcon: '😊',
     expressionName: '开心',
@@ -585,7 +603,7 @@ Page({
       expressionColor: current.color
     });
     // 通过蓝牙发送表情指令
-    this.sendCmd(CmdCode.EXPRESSION, new Uint8Array([newIndex]));
+    this.sendCmd(CmdCode.EXPRESSION, new Uint8Array([current.value]));
   },
   // ========== 四足复位 ==========
 
@@ -645,12 +663,15 @@ Page({
       isTouching: false,
       joystickX: 0,
       joystickY: 0,
+      throttleX: 0,
+      throttleY: 0,
+      lastStickSendAt: Date.now(),
     });
     this.sendCmd(CmdCode.JOYSTICK, new Uint8Array([128, 128])); // (0, 0)
   },
 
   updateJoystick(e: any) {
-    const touch = e.touches && e.touches[0];
+   const touch = e.touches && e.touches[0];
     // 关键修复：touchend 之后到达的过期回调直接丢弃，防止旧坐标把摇杆"写回去"
     if (!touch || !this.data.isTouching) return;
 
@@ -670,16 +691,26 @@ Page({
       dy = (dy / distance) * maxRadius;
     }
 
-    // 映射到 -100 ~ 100 用于发送
-    const x = Math.round((dx / maxRadius) * 100);
-    const y = Math.round((dy / maxRadius) * -100); // Y轴反转
+    // 映射到 -100 ~ 100：右为正(X)、上为正(Y)
+    const throttleX = Math.round((dx / maxRadius) * 100);
+    const throttleY = Math.round((dy / maxRadius) * -100); // 屏幕Y轴向下，取反后向上为正
 
+    // 节流判断：距上次发送是否已满 100ms
+    const now = Date.now();
+    const canSend = now - this.data.lastStickSendAt >= JOYSTICK_SEND_INTERVAL_MS;
+
+    // 跟手显示不限流，保证手感流畅
     this.setData({
-      joystickX: Math.round(dx),  // 直接使用像素偏移
+      joystickX: Math.round(dx),
       joystickY: Math.round(dy),
+      throttleX,
+      throttleY,
     });
 
-    this.sendCmd(CmdCode.JOYSTICK, new Uint8Array([x + 128, y + 128]));
+    if (canSend) {
+      this.setData({ lastStickSendAt: now });
+      this.sendCmd(CmdCode.JOYSTICK, new Uint8Array([throttleX + 128, throttleY + 128]));
+    }
   },
 
 

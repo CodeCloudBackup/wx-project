@@ -12,10 +12,10 @@
         <view class="battery-body"></view>
         <view class="battery-head"></view>
       </view>
-      <text class="battery-text {{batteryClass}}" wx:if="{{batteryLevel !== null}}"> {{batteryLevel}}%</text>  
+      <text class="joystick-value">油门 X:{{throttleX}}  Y:{{throttleY}}</text>  
     </view>
   </view>
-  
+
   <!-- 设备选择弹窗 -->
   <view class="device-mask" wx:if="{{showDevicePopup}}" bindtap="closeDevicePopup"></view>
   <view class="device-popup" wx:if="{{showDevicePopup}}" catchtap="noop">

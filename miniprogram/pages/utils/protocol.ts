@@ -43,6 +43,8 @@ export enum ExpressionType {
   CRY     = 0x01, // 哭泣
   DAZE    = 0x02, // 发呆
   ANGRY   = 0x03, // 生气
+  SLEEP   = 0x04, // 生气
+  NORMAL  = 0x05, // 正常
 }
 // 协议帧打包函数
 export function packFrame(cmd: CmdCode, data: Uint8Array = new Uint8Array(0)): ArrayBuffer {
