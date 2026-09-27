@@ -4,16 +4,36 @@
   <!-- 顶部状态栏 -->
   <view class="status-bar">
     <text class="status-text">{{connected ? '🟢 已连接: ' + deviceName : '🔴 未连接'}}</text>
-    <button class="connect-btn" bindtap="onConnect" wx:if="{{!connected}}">搜索连接</button>
-    <button class="disconnect-btn" bindtap="onDisconnect" wx:if="{{connected}}">断开</button>
+    <button class="connect-btn" hover-class="btn-hover" :hover-stay-time="80" bindtap="onConnect" wx:if="{{!connected}}">连接设备</button>
+    <button class="disconnect-btn" hover-class="btn-hover" :hover-stay-time="80" bindtap="onDisconnect" wx:if="{{connected}}">断开</button>
      <!-- 电量显示（仅在连接成功后显示，且放在连接状态右侧） -->
-    <view class="battery-display"  wx:if="{{connected}}">
-      <view class="battery-icon" wx:if="{{!batteryLevel}}">
+     <view class="battery-display"  wx:if="{{connected}}">
+      <view class="battery-icon" wx:if="{{batteryLevel === null}}">
         <view class="battery-body"></view>
         <view class="battery-head"></view>
       </view>
-      <text class="battery-text {{getBatteryClass(batteryLevel)}}" wx:if="{{batteryLevel}}"> {{batteryLevel}}%</text>  
+      <text class="battery-text {{batteryClass}}" wx:if="{{batteryLevel !== null}}"> {{batteryLevel}}%</text>  
     </view>
+  </view>
+  
+  <!-- 设备选择弹窗 -->
+  <view class="device-mask" wx:if="{{showDevicePopup}}" bindtap="closeDevicePopup"></view>
+  <view class="device-popup" wx:if="{{showDevicePopup}}" catchtap="noop">
+    <view class="device-popup-header">
+      <text class="device-popup-title">选择设备</text>
+      <text class="device-popup-close" bindtap="closeDevicePopup">✕</text>
+    </view>
+    <scroll-view scroll-y class="device-popup-list">
+      <view class="device-item {{item.deviceId === deviceId ? 'device-item-active' : ''}}"
+            wx:for="{{deviceList}}" wx:key="deviceId"
+            data-device-id="{{item.deviceId}}" data-name="{{item.name}}"
+            bindtap="onSelectDevice">
+        <text class="device-name">{{item.name}}</text>
+        <text class="device-tag" wx:if="{{item.deviceId === deviceId && connected}}">已连接</text>
+        <text class="device-del" catchtap="onDeleteDevice" data-device-id="{{item.deviceId}}" data-name="{{item.name}}">删除</text>
+      </view>
+    </scroll-view>
+    <button class="device-rescan-btn" hover-class="btn-hover" bindtap="onReSearch">重新搜索</button>
   </view>
 
   <!-- 主体内容 -->
@@ -22,15 +42,15 @@
     <view class="joystick-area">
       <!-- 独立功能按钮（放在摇杆上方） -->
       <view class="system-btns">
-        <button class="system-btn system-btn-reboot" data-action="reboot" bindtap="onAction">重启机器</button>
-        <button class="system-btn system-btn-reset" data-action="leg_reset" bindtap="onAction">四足复位</button>
+        <button class="system-btn system-btn-reboot" hover-class="btn-hover" :hover-stay-time="80" data-action="reboot" bindtap="onAction">重启机器</button>
+        <button class="system-btn system-btn-reset" hover-class="btn-hover" :hover-stay-time="80" data-action="leg_reset" bindtap="onAction">四足复位</button>
         
       </view>
 
       <!-- 虚拟摇杆 -->
-      <view id="joystick-container" class="joystick-container" bindtouchstart="onJoystickTouchStart" bindtouchmove="onJoystickTouchMove" bindtouchend="onJoystickTouchEnd">
+      <view id="joystick-container" class="joystick-container" bindtouchstart="onJoystickTouchStart" bindtouchmove="onJoystickTouchMove" bindtouchend="onJoystickTouchEnd" bindtouchcancel="onJoystickTouchCancel">
       <view class="joystick-base"></view>
-      <view class="joystick-handle" style="transform: translate({{joystickX}}px, {{joystickY}}px)"></view>
+      <view class="joystick-handle {{isTouching ? 'active' : ''}}" style="transform: translate({{joystickX}}px, {{joystickY}}px)"></view>
       </view>
       <!-- 油门数值 -->
       <text class="joystick-value">油门: {{joystickY}}%</text>
@@ -48,28 +68,28 @@
             <text class="heading-value">{{headingValue}}°</text>
           </view>
           <!-- 表情切换按钮 -->
-          <view class="expression-switch" style="background-color: {{expressionColor}}" bindtap="onSwitchExpression">
+          <view class="expression-switch" hover-class="btn-hover" :hover-stay-time="80" style="background-color: {{expressionColor}}" bindtap="onSwitchExpression">
             <text class="expression-name">{{expressionName}}</text>
           </view>
         </view>
         
         <view class="action-grid">
         <!-- 第1行：姿态控制 -->
-        <button class="action-btn" data-action="stand" bindtap="onAction">站立</button>
-        <button class="action-btn" data-action="lie-back" bindtap="onAction">向后趴下</button>
-        <button class="action-btn" data-action="sit-down" bindtap="onAction">坐下</button>
-        <button class="action-btn" data-action="lie-forward" bindtap="onAction">向前趴下</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="stand" bindtap="onAction">站立</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="lie-back" bindtap="onAction">向后趴下</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="sit-down" bindtap="onAction">坐下</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="lie-forward" bindtap="onAction">向前趴下</button>
        
         <!-- 第2行：小交互 -->
-        <button class="action-btn" data-action="shake-head" bindtap="onAction">摇头</button>
-        <button class="action-btn" data-action="wag-tail" bindtap="onAction">摇尾</button>
-        <button class="action-btn" data-action="wave" bindtap="onAction">挥手</button>
-        <button class="action-btn" data-action="mark" bindtap="onAction">做标记</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="shake-head" bindtap="onAction">摇头</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="wag-tail" bindtap="onAction">摇尾</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="wave" bindtap="onAction">挥手</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="mark" bindtap="onAction">做标记</button>
          <!-- 第3行：趣味动作 -->
-        <button class="action-btn" data-action="crawl" bindtap="onAction">匍匐前进</button>
-        <button class="action-btn" data-action="push-up" bindtap="onAction">俯卧撑</button>
-        <button class="action-btn" data-action="sway" bindtap="onAction">左右摇晃</button>
-        <button class="action-btn" data-action="rock" bindtap="onAction">前后摇晃</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="crawl" bindtap="onAction">匍匐前进</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="push-up" bindtap="onAction">俯卧撑</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="sway" bindtap="onAction">左右摇晃</button>
+        <button class="action-btn" hover-class="btn-hover" :hover-stay-time="80" data-action="rock" bindtap="onAction">前后摇晃</button>
         </view>
       </view>
     </view>

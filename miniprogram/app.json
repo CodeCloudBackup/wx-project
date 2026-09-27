@@ -8,7 +8,7 @@
     },
     "scope.bluetooth": {
       "desc": "用于连接和控制你的机器狗"
-    }
-  },
-  "requiredBackgroundModes": ["bluetooth"]
+    },
+    "requiredPrivateInfos": ["getLocation"]
+  }
 }
